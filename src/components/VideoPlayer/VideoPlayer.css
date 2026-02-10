@@ -1,0 +1,94 @@
+/* Fullscreen root */
+.video-player-container {
+  position: fixed;
+  inset: 0;
+  background: black;
+  z-index: 1000;
+}
+
+/* Back button */
+.back-btn {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  z-index: 20;
+  background: rgba(0, 0, 0, 0.6);
+  color: white;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 20px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+/* Video wrapper MUST fill screen */
+.video-wrapper {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* VIDEO — THIS FIXES THE ISSUE */
+.video-el {
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* 🔥 KEY FIX */
+  background: black;
+}
+
+/* Controls container */
+.controls {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 14px 18px;
+  background: linear-gradient(
+    to top,
+    rgba(0, 0, 0, 0.75),
+    rgba(0, 0, 0, 0)
+  );
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  opacity: 1; /* always visible */
+}
+
+/* Progress bar */
+.progress {
+  width: 100%;
+  cursor: pointer;
+  accent-color: #1d9bf0;
+}
+
+/* Controls row */
+.control-row {
+  display: flex;
+  justify-content: center;
+}
+
+.left-controls {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  color: white;
+  margin-bottom:12px;
+}
+
+/* Buttons */
+.left-controls button {
+  background: rgba(255, 255, 255, 0.15);
+  color: white;
+  border: none;
+  border-radius: 30px;
+  padding: 8px 14px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+/* Time text */
+.time {
+  font-size: 13px;
+  opacity: 0.85;
+}

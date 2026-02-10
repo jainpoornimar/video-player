@@ -1,10 +1,12 @@
-import type { Category } from "./category";
-
 export interface Video {
   id: string;
   title: string;
+  mediaUrl: string;   // <-- changed from src to mediaUrl
   thumbnailUrl: string;
-  mediaUrl: string;
-  duration: number; // in seconds
-  category: Category;
+  duration: number;
+  category: {
+    slug: string;
+    name: string;
+    iconUrl: string;
+  };
 }

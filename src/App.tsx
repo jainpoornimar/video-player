@@ -1,35 +1,55 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useState } from "react";
+import Home from "./pages/Home/Home";
+import type { Video } from "./types/video";
+import VideoPlayer from "./components/VideoPlayer/VideoPlayer";
+import {videos} from "./data/videos";
+import VideoPortal from "./components/VideoPlayer/VideoPortal";
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [selectedVideo, setSelectedVideo] = useState<Video | null>(null);
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+  <div
+    style={{
+      minHeight: "100vh",
+      transition: "opacity 0.35s ease, transform 0.35s ease",
+    }}
+  >
+    {selectedVideo ? (
+      <div
+        style={{
+          opacity: 1,
+          transform: "scale(1)",
+          transition: "opacity 0.35s ease, transform 0.35s ease",
+        }}
+      >
+        
+
+{selectedVideo && (
+  <VideoPortal>
+    <VideoPlayer
+      video={selectedVideo}
+      allVideos={videos}
+      onClose={() => setSelectedVideo(null)}
+    />
+  </VideoPortal>
+)}
+
+
       </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
+    ) : (
+      <div
+        style={{
+          opacity: 1,
+          transform: "scale(1)",
+          transition: "opacity 0.35s ease, transform 0.35s ease",
+        }}
+      >
+        <Home onSelectVideo={setSelectedVideo} />
       </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    )}
+  </div>
+);
 }
 
-export default App
+export default App;
