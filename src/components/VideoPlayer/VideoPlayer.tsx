@@ -3,6 +3,9 @@ import type { Video } from "../../types/video";
 import Hls from "hls.js";
 import "./VideoPlayer.css";
 
+
+
+
 interface Props {
   video: Video;
   allVideos: Video[];
@@ -81,7 +84,7 @@ useEffect(() => {
     return () => {
       hls?.destroy();
     };
-  }, [activeVideo.id]); // 🔥 DO NOT include mode
+  }, [activeVideo.id]); 
 
   /* VIDEO EVENTS */
   useEffect(() => {
@@ -267,6 +270,8 @@ const visibleVideos = relatedVideos.slice(startIndex, endIndex);
           : undefined
       }
     >
+
+      
       {/*  FULLSCREEN HEADER  */}
       {mode === "fullscreen" && (
         <>
