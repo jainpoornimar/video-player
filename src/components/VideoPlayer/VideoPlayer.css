@@ -1,9 +1,14 @@
-/* Fullscreen root */
-.video-player-container {
+/* Fullscreen root - ONLY when not mini */
+.video-player-container:not(.mini-mode) {
   position: fixed;
   inset: 0;
   background: black;
   z-index: 1000;
+}
+
+/* Mini mode - inline styles will handle positioning */
+.video-player-container.mini-mode {
+  /* Positioning handled by inline styles in component */
 }
 
 /* Back button */
@@ -19,21 +24,28 @@
   border-radius: 20px;
   font-size: 14px;
   cursor: pointer;
+  transition: background 0.2s ease;
 }
 
-/* Video wrapper MUST fill screen */
+.back-btn:hover {
+  background: rgba(0, 0, 0, 0.8);
+}
+
+/* Video wrapper MUST fill screen in fullscreen mode */
 .video-wrapper {
   position: relative;
-  width: 100vw;
-  height: 100vh;
+  width: 100%;
+  height: 100%;
   overflow: hidden;
+  touch-action: none;
+  background: #000;
 }
 
-/* VIDEO — THIS FIXES THE ISSUE */
+/* VIDEO element */
 .video-el {
   width: 100%;
   height: 100%;
-  object-fit: cover; /* 🔥 KEY FIX */
+  object-fit: contain;
   background: black;
 }
 
@@ -52,7 +64,8 @@
   display: flex;
   flex-direction: column;
   gap: 10px;
-  opacity: 1; /* always visible */
+  opacity: 1;
+  transition: opacity 0.3s ease;
 }
 
 /* Progress bar */
@@ -60,6 +73,24 @@
   width: 100%;
   cursor: pointer;
   accent-color: #1d9bf0;
+  height: 4px;
+}
+
+.progress::-webkit-slider-thumb {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #1d9bf0;
+  cursor: pointer;
+}
+
+.progress::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #1d9bf0;
+  cursor: pointer;
+  border: none;
 }
 
 /* Controls row */
@@ -73,7 +104,7 @@
   align-items: center;
   gap: 18px;
   color: white;
-  margin-bottom:12px;
+  margin-bottom: 12px;
 }
 
 /* Buttons */
@@ -85,10 +116,24 @@
   padding: 8px 14px;
   font-size: 14px;
   cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.left-controls button:hover {
+  background: rgba(255, 255, 255, 0.25);
+  transform: scale(1.05);
+}
+
+.left-controls button:active {
+  transform: scale(0.98);
 }
 
 /* Time text */
 .time {
   font-size: 13px;
   opacity: 0.85;
+  font-weight: 500;
 }
+
+/* Remove unused old classes */
+/* These are no longer needed but kept for reference if you want to clean up */

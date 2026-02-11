@@ -2,54 +2,67 @@ import { useState } from "react";
 import Home from "./pages/Home/Home";
 import type { Video } from "./types/video";
 import VideoPlayer from "./components/VideoPlayer/VideoPlayer";
-import {videos} from "./data/videos";
-import VideoPortal from "./components/VideoPlayer/VideoPortal";
+import { videos } from "./data/videos";
 
 function App() {
   const [selectedVideo, setSelectedVideo] = useState<Video | null>(null);
+  const [playerMode, setPlayerMode] = useState<"fullscreen" | "mini">(
+    "fullscreen"
+  );
+
+  const isFullscreenVideo = selectedVideo && playerMode === "fullscreen";
 
   return (
-  <div
-    style={{
-      minHeight: "100vh",
-      transition: "opacity 0.35s ease, transform 0.35s ease",
-    }}
-  >
-    {selectedVideo ? (
+    <div style={{ position: "relative", minHeight: "100vh" }}>
+      {/* ================= HOME PAGE =================
+          Always rendered to preserve state
+      */}
       <div
         style={{
-          opacity: 1,
-          transform: "scale(1)",
-          transition: "opacity 0.35s ease, transform 0.35s ease",
+          display: isFullscreenVideo ? "none" : "block",
+          position: "relative",
+          zIndex: 1,
         }}
       >
-        
-
-{selectedVideo && (
-  <VideoPortal>
-    <VideoPlayer
-      video={selectedVideo}
-      allVideos={videos}
-      onClose={() => setSelectedVideo(null)}
-    />
-  </VideoPortal>
-)}
-
-
+        <Home
+          onSelectVideo={(video) => {
+            setSelectedVideo(video);
+            setPlayerMode("fullscreen");
+          }}
+        />
       </div>
-    ) : (
-      <div
-        style={{
-          opacity: 1,
-          transform: "scale(1)",
-          transition: "opacity 0.35s ease, transform 0.35s ease",
-        }}
-      >
-        <Home onSelectVideo={setSelectedVideo} />
-      </div>
-    )}
-  </div>
-);
+
+      {/* ================= VIDEO PLAYER =================
+          Mini player needs higher z-index to appear on top
+      */}
+      {selectedVideo && (
+        <div
+          style={{
+            position: playerMode === "mini" ? "fixed" : "relative",
+            zIndex: playerMode === "mini" ? 9999 : 10,
+          }}
+        >
+          <VideoPlayer
+            video={selectedVideo}
+            allVideos={videos}
+            mode={playerMode}
+            onMinimize={() => {
+              console.log("App: switching to mini mode");
+              setPlayerMode("mini");
+            }}
+            onRestore={() => {
+              console.log("App: restoring fullscreen");
+              setPlayerMode("fullscreen");
+            }}
+            onClose={() => {
+              setSelectedVideo(null);
+              setPlayerMode("fullscreen");
+            }}
+          />
+        </div>
+      )}
+    </div>
+  );
 }
 
 export default App;
