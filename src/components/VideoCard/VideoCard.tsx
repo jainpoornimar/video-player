@@ -1,52 +1,59 @@
 import type { Video } from "../../types/video";
 
-interface VideoCardProps {
+interface Props {
   video: Video;
   onClick: () => void;
 }
 
-const formatDuration = (seconds: number) => {
-  const mins = Math.floor(seconds / 60);
-  const secs = seconds % 60;
-  return `${mins}:${secs.toString().padStart(2, "0")}`;
+const formatDuration = (sec: number) => {
+  const m = Math.floor(sec / 60);
+  const s = Math.floor(sec % 60);
+  return `${m}:${s.toString().padStart(2, "0")}`;
 };
 
-const VideoCard = ({ video, onClick }: VideoCardProps) => {
+const VideoCard = ({ video, onClick }: Props) => {
   return (
     <div
       onClick={onClick}
       style={{
-        display: "flex",
-        gap: "16px",
-        backgroundColor: "#1c1c1c",
-        borderRadius: "12px",
-        overflow: "hidden",
         cursor: "pointer",
-        transition: "background-color 0.2s ease",
+        borderRadius: "14px",
+        overflow: "hidden",
+        background: "#181818",
+        transition: "transform 0.2s ease, box-shadow 0.2s ease",
+      }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.transform = "translateY(-4px)";
+        e.currentTarget.style.boxShadow =
+          "0 10px 25px rgba(0,0,0,0.5)";
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.transform = "translateY(0)";
+        e.currentTarget.style.boxShadow = "none";
       }}
     >
-      {/* Thumbnail */}
       <div style={{ position: "relative" }}>
         <img
           src={video.thumbnailUrl}
           alt={video.title}
           style={{
-            width: "160px",
-            height: "100px",
+            width: "100%",
+            height: "160px",
             objectFit: "cover",
           }}
+          
         />
+        
 
-        {/* Duration */}
+        {/* Duration Badge */}
         <span
           style={{
             position: "absolute",
-            bottom: "6px",
-            right: "6px",
+            bottom: 8,
+            right: 8,
             background: "rgba(0,0,0,0.8)",
-            color: "#fff",
+            padding: "3px 6px",
             fontSize: "12px",
-            padding: "2px 6px",
             borderRadius: "4px",
           }}
         >
@@ -54,42 +61,29 @@ const VideoCard = ({ video, onClick }: VideoCardProps) => {
         </span>
       </div>
 
-      {/* Info */}
-      <div
-        style={{
-          flex: 1,
-          padding: "12px 12px 12px 0",
-          display: "flex",
-          flexDirection: "column",
-          justifyContent: "center",
-        }}
-      >
-        <h3
+      <div style={{ padding: "12px" }}>
+        <div
           style={{
-            fontSize: "16px",
-            fontWeight: 500,
-            marginBottom: "8px",
+            fontSize: "14px",
+            fontWeight: 600,
+            marginBottom: "6px",
+            color: "#fff",
           }}
         >
           {video.title}
-        </h3>
+        </div>
 
-        {/* Category badge */}
-        <span
+        <div
           style={{
-            display: "inline-block",
-            backgroundColor: "#2a2a2a",
-            color: "#ccc",
             fontSize: "12px",
-            padding: "4px 8px",
-            borderRadius: "999px",
-            width: "fit-content",
+            color: "#aaa",
           }}
         >
           {video.category.name}
-        </span>
+        </div>
       </div>
     </div>
+    
   );
 };
 

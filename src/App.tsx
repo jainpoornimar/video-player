@@ -14,8 +14,8 @@ function App() {
 
   return (
     <div style={{ position: "relative", minHeight: "100vh" }}>
-      {/* ================= HOME PAGE =================
-          Always rendered to preserve state
+      {/*  HOME PAGE 
+          
       */}
       <div
         style={{
@@ -32,8 +32,8 @@ function App() {
         />
       </div>
 
-      {/* ================= VIDEO PLAYER =================
-          Mini player needs higher z-index to appear on top
+      {/*  VIDEO PLAYER 
+          
       */}
       {selectedVideo && (
         <div

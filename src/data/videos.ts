@@ -4,9 +4,9 @@ export const videos: Video[] = [
   {
     id: "video-1",
     title: "Sample AI Reel",
-    thumbnailUrl: "https://picsum.photos/400/700?random=1",
+    thumbnailUrl: "/thumbnails/video1.jpg",  
     mediaUrl: "https://www.w3schools.com/html/mov_bbb.mp4",
-    duration: 596,
+    duration: 10,
     category: {
       slug: "social-media-ai",
       name: "Social Media AI",
@@ -16,11 +16,11 @@ export const videos: Video[] = [
   {
     id: "video-2",
     title: "Advanced Social Media AI Tips",
-    thumbnailUrl: "https://picsum.photos/400/700?random=2",
+    thumbnailUrl: "/thumbnails/video2.jpg",  
     mediaUrl: "https://media.w3.org/2010/05/sintel/trailer.mp4",
     duration: 52,
     category: {
-      slug: "social-media-ai", // 👈 SAME CATEGORY
+      slug: "social-media-ai",
       name: "Social Media AI",
       iconUrl: "",
     },
@@ -28,9 +28,9 @@ export const videos: Video[] = [
   {
     id: "video-3",
     title: "AI Income Strategy",
-    thumbnailUrl: "https://picsum.photos/400/700?random=3",
+    thumbnailUrl: "/thumbnails/video3.jpg",  
     mediaUrl: "https://www.w3schools.com/html/movie.mp4",
-    duration: 420,
+    duration: 12,
     category: {
       slug: "ai-income",
       name: "AI Income",

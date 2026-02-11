@@ -1,7 +1,7 @@
 export interface Video {
   id: string;
   title: string;
-  mediaUrl: string;   // <-- changed from src to mediaUrl
+  mediaUrl: string;   
   thumbnailUrl: string;
   duration: number;
   category: {

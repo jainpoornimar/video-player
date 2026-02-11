@@ -1,4 +1,4 @@
-/* Fullscreen root - ONLY when not mini */
+/* Fullscreen root  */
 .video-player-container:not(.mini-mode) {
   position: fixed;
   inset: 0;
@@ -6,10 +6,7 @@
   z-index: 1000;
 }
 
-/* Mini mode - inline styles will handle positioning */
-.video-player-container.mini-mode {
-  /* Positioning handled by inline styles in component */
-}
+
 
 /* Back button */
 .back-btn {
@@ -135,5 +132,18 @@
   font-weight: 500;
 }
 
-/* Remove unused old classes */
-/* These are no longer needed but kept for reference if you want to clean up */
+
+@keyframes skipFade {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.6);
+  }
+  50% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1.1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.9);
+  }
+}

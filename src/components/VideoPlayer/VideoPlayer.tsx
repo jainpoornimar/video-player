@@ -36,16 +36,19 @@ const VideoPlayer = ({
   const [duration, setDuration] = useState(0);
   const [showControls, setShowControls] = useState(true);
   const [showList, setShowList] = useState(false);
-/* ===============================
-   SYNC PROP VIDEO → LOCAL STATE
-   =============================== */
+  const [showUpNext, setShowUpNext] = useState(false);
+const [countdown, setCountdown] = useState(2);
+const [isPiP, setIsPiP] = useState(false);
+const [skipFeedback, setSkipFeedback] = useState<null | "forward" | "backward">(null);
+
+
+
+/* SYNC PROP VIDEO → LOCAL STATE*/
 useEffect(() => {
   setActiveVideo(video);
 }, [video]);
 
-  /* ===============================
-     LOAD VIDEO (ONLY WHEN VIDEO CHANGES)
-     =============================== */
+  /* LOAD VIDEO (ONLY WHEN VIDEO CHANGES)*/
   useEffect(() => {
     const el = videoRef.current;
     if (!el) return;
@@ -80,9 +83,7 @@ useEffect(() => {
     };
   }, [activeVideo.id]); // 🔥 DO NOT include mode
 
-  /* ===============================
-     VIDEO EVENTS
-     =============================== */
+  /* VIDEO EVENTS */
   useEffect(() => {
     const el = videoRef.current;
     if (!el) return;
@@ -91,23 +92,71 @@ useEffect(() => {
     const handlePause = () => setIsPlaying(false);
     const handleTime = () => setCurrentTime(el.currentTime);
     const handleMeta = () => setDuration(el.duration || 0);
+    const handleEnded = () => {
+  if (relatedVideos.length === 0) return;
+
+  setShowUpNext(true);
+  setCountdown(2);
+};
+
 
     el.addEventListener("play", handlePlay);
     el.addEventListener("pause", handlePause);
     el.addEventListener("timeupdate", handleTime);
     el.addEventListener("loadedmetadata", handleMeta);
+    el.addEventListener("play", handlePlay);
+
+    el.addEventListener("ended", handleEnded);
+
 
     return () => {
       el.removeEventListener("play", handlePlay);
       el.removeEventListener("pause", handlePause);
       el.removeEventListener("timeupdate", handleTime);
       el.removeEventListener("loadedmetadata", handleMeta);
+      el.removeEventListener("ended", handleEnded);
+
     };
   }, []);
 
-  /* ===============================
-     CONTROLS
-     =============================== */
+  useEffect(() => {
+  if (!showUpNext) return;
+
+  if (countdown === 0) {
+    const nextVideo = relatedVideos[0];
+    if (nextVideo) {
+      setActiveVideo(nextVideo);
+    }
+    setShowUpNext(false);
+    return;
+  }
+
+  const timer = setTimeout(() => {
+    setCountdown((prev) => prev - 1);
+  }, 1000);
+
+  return () => clearTimeout(timer);
+}, [showUpNext, countdown]);
+
+
+useEffect(() => {
+  const video = videoRef.current;
+  if (!video) return;
+
+  const handleEnter = () => setIsPiP(true);
+  const handleLeave = () => setIsPiP(false);
+
+  video.addEventListener("enterpictureinpicture", handleEnter);
+  video.addEventListener("leavepictureinpicture", handleLeave);
+
+  return () => {
+    video.removeEventListener("enterpictureinpicture", handleEnter);
+    video.removeEventListener("leavepictureinpicture", handleLeave);
+  };
+}, []);
+
+
+  /*  CONTROLS*/
   const togglePlay = () => {
     const el = videoRef.current;
     if (!el) return;
@@ -115,19 +164,52 @@ useEffect(() => {
     el.paused ? el.play().catch(() => {}) : el.pause();
   };
 
+  /* PIP toggle function */
+
+  const togglePiP = async () => {
+  const video = videoRef.current;
+  if (!video) return;
+
+  try {
+    if (document.pictureInPictureElement) {
+      await document.exitPictureInPicture();
+      setIsPiP(false);
+    } else {
+      await video.requestPictureInPicture();
+      setIsPiP(true);
+    }
+  } catch (err) {
+    console.error("PiP failed:", err);
+  }
+};
+
+
   const seekBy = (sec: number) => {
-    if (!videoRef.current) return;
-    videoRef.current.currentTime += sec;
-  };
+  const el = videoRef.current;
+  if (!el) return;
+
+  el.currentTime += sec;
+
+  // Trigger animation
+  if (sec > 0) {
+    setSkipFeedback("forward");
+  } else {
+    setSkipFeedback("backward");
+  }
+
+  // Clear animation after 500ms
+  setTimeout(() => {
+    setSkipFeedback(null);
+  }, 500);
+};
+
 
   const seekTo = (time: number) => {
     if (!videoRef.current) return;
     videoRef.current.currentTime = time;
   };
 
-  /* ===============================
-     DRAG TO MINIMIZE
-     =============================== */
+  /* DRAG TO MINIMIZE*/
   const handlePointerDown = (e: React.PointerEvent) => {
     if (mode === "mini") return;
     dragStartY.current = e.clientY;
@@ -146,14 +228,22 @@ useEffect(() => {
     dragStartY.current = null;
   };
 
-  /* ===============================
-     RELATED VIDEOS
-     =============================== */
+  /* RELATED VIDEOS */
   const relatedVideos = allVideos.filter(
     (v: Video) =>
       v.category.slug === activeVideo.category.slug &&
       v.id !== activeVideo.id
   );
+
+  const ITEM_HEIGHT = 90; 
+const VISIBLE_COUNT = 6;
+const [scrollTop, setScrollTop] = useState(0);
+
+const startIndex = Math.floor(scrollTop / ITEM_HEIGHT);
+const endIndex = startIndex + VISIBLE_COUNT;
+
+const visibleVideos = relatedVideos.slice(startIndex, endIndex);
+
 
   return (
     <div
@@ -177,7 +267,7 @@ useEffect(() => {
           : undefined
       }
     >
-      {/* ================= FULLSCREEN HEADER ================= */}
+      {/*  FULLSCREEN HEADER  */}
       {mode === "fullscreen" && (
         <>
           <button className="back-btn" onClick={onClose}>
@@ -205,7 +295,7 @@ useEffect(() => {
         </>
       )}
 
-      {/* ================= VIDEO WRAPPER ================= */}
+      {/*  VIDEO WRAPPER  */}
       <div
         className="video-wrapper"
         onMouseMove={() => setShowControls(true)}
@@ -228,8 +318,31 @@ useEffect(() => {
             if (mode === "mini") onRestore();
           }}
         />
+        {/* Skip Feedback Animation */}
+{skipFeedback && (
+  <div
+    style={{
+      position: "absolute",
+      top: "50%",
+      left: skipFeedback === "backward" ? "30%" : "70%",
+      transform: "translate(-50%, -50%)",
+      fontSize: 28,
+      fontWeight: 700,
+      color: "white",
+      background: "rgba(0,0,0,0.6)",
+      padding: "12px 18px",
+      borderRadius: 50,
+      animation: "skipFade 0.5s ease",
+      pointerEvents: "none",
+      zIndex: 30,
+    }}
+  >
+    {skipFeedback === "forward" ? "+10s" : "-10s"}
+  </div>
+)}
 
-        {/* ================= FULLSCREEN CONTROLS ================= */}
+
+        {/*  FULLSCREEN CONTROLS  */}
         {mode === "fullscreen" && (
           <>
             <div className={`controls ${showControls ? "show" : ""}`}>
@@ -244,15 +357,19 @@ useEffect(() => {
 
               <div className="control-row">
                 <div className="left-controls">
-                  <button onClick={() => seekBy(-10)}>⏪ 10</button>
-                  <button onClick={togglePlay}>
-                    {isPlaying ? "⏸" : "▶"}
-                  </button>
-                  <button onClick={() => seekBy(10)}>10 ⏩</button>
-                  <span className="time">
-                    {formatTime(currentTime)} / {formatTime(duration)}
-                  </span>
-                </div>
+  <button onClick={() => seekBy(-10)}>⏪ </button>
+  <button onClick={togglePlay}>
+    {isPlaying ? "⏸" : "▶"}
+  </button>
+  <button onClick={() => seekBy(10)}> ⏩</button>
+  <button onClick={togglePiP}>
+    {isPiP ? "🗗" : "🗖"}
+  </button>
+  <span className="time">
+    {formatTime(currentTime)} / {formatTime(duration)}
+  </span>
+</div>
+
               </div>
             </div>
             {/* Reveal Handle */}
@@ -277,62 +394,115 @@ useEffect(() => {
   />
 </div>
 
+ {showUpNext && (
+  <div
+    style={{
+      position: "absolute",
+      inset: 0,
+      background: "rgba(0,0,0,0.7)",
+      display: "flex",
+      flexDirection: "column",
+      justifyContent: "center",
+      alignItems: "center",
+      color: "white",
+      zIndex: 30,
+    }}
+  >
+    <h2 style={{ marginBottom: 16 }}>
+      Up Next in {countdown}...
+    </h2>
+
+    <button
+      onClick={() => setShowUpNext(false)}
+      style={{
+        padding: "8px 16px",
+        background: "#0972b4",
+        border: "none",
+        borderRadius: 6,
+        color: "white",
+        cursor: "pointer",
+      }}
+    >
+      Cancel
+    </button>
+  </div>
+)}
+
 
             {/* RELATED DRAWER */}
             <div
-              style={{
-                position: "absolute",
-                left: 0,
-                right: 0,
-                bottom: 0,
-                height: "35%",
-                background: "#111",
-                transform: showList
-                  ? "translateY(0)"
-                  : "translateY(100%)",
-                transition: "transform 0.35s ease",
-                zIndex: 14,
-                padding: "16px",
-                overflowY: "auto",
-                color: "white",
-              }}
-            >
+  onScroll={(e) =>
+    setScrollTop((e.target as HTMLDivElement).scrollTop)
+  }
+  style={{
+    position: "absolute",
+    left: 0,
+    right: 0,
+    bottom: 0,
+    height: "35%",
+    background: "#111",
+    transform: showList ? "translateY(0)" : "translateY(100%)",
+    transition: "transform 0.35s ease",
+    zIndex: 14,
+    padding: "16px",
+    overflowY: "auto",
+    color: "white",
+  }}
+>
+
               <h4>Related Videos</h4>
 
-              {relatedVideos.map((v) => (
-                <div
-                  key={v.id}
-                  style={{
-                    display: "flex",
-                    gap: 12,
-                    marginBottom: 12,
-                    cursor: "pointer",
-                  }}
-                  onClick={() => {
-                    setShowList(false);
-                    setActiveVideo(v);
-                  }}
-                >
-                  <img
-                    src={v.thumbnailUrl}
-                    style={{
-                      width: 120,
-                      height: 70,
-                      objectFit: "cover",
-                      borderRadius: 6,
-                    }}
-                  />
-                  <div>
-                    <div style={{ fontWeight: 500 }}>{v.title}</div>
-                    <div style={{ opacity: 0.6 }}>{v.duration}</div>
-                  </div>
-                </div>
-              ))}
+              <div
+  style={{
+    height: relatedVideos.length * ITEM_HEIGHT,
+    position: "relative",
+  }}
+>
+  {visibleVideos.map((v, index) => {
+    const actualIndex = startIndex + index;
+
+    return (
+      <div
+        key={v.id}
+        style={{
+          position: "absolute",
+          top: actualIndex * ITEM_HEIGHT,
+          left: 0,
+          right: 0,
+          height: ITEM_HEIGHT,
+          display: "flex",
+          gap: 12,
+          marginBottom: 12,
+          cursor: "pointer",
+        }}
+        onClick={() => {
+          setShowList(false);
+          setActiveVideo(v);
+        }}
+      >
+        <img
+          src={v.thumbnailUrl}
+          style={{
+            width: 120,
+            height: 70,
+            objectFit: "cover",
+            borderRadius: 6,
+          }}
+        />
+        <div>
+          <div style={{ fontWeight: 500 }}>{v.title}</div>
+          <div style={{ opacity: 0.6 }}>{v.duration}</div>
+        </div>
+      </div>
+    );
+  })}
+</div>
+
             </div>
           </>
         )}
 
-        {/* ================= MINI CONTROLS ================= */}
+        {/*  MINI CONTROLS  */}
         {mode === "mini" && (
           <div
             style={{
